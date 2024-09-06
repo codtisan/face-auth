@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "test"
+version = "0.1.0"
+description = ""
+authors = ["Chris Chan <chrisstudio1016@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.113.0"
+uvicorn = "^0.30.6"
+pydantic = "^2.9.0"
+deepface = "^0.0.93"
+python-dotenv = "^1.0.1"
+python-multipart = "^0.0.9"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.11.2"
+ruff = "^0.6.4"
+
+[tool.mypy]
+strict = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
