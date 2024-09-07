@@ -13,7 +13,7 @@ async def check_vectorstore_collection() -> None:
     qdrant = Qdrant()
     is_exist = await qdrant.check_exist("face_data")
     if not is_exist:
-        await qdrant.create_collection("face_data", 128)
+        await qdrant.create_collection("face_data", 512)
 
 
 async def setup() -> None:

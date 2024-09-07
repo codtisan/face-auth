@@ -47,7 +47,7 @@ async def register(file: UploadFile = File(...)) -> FaceRegistrationResponse:
     image.save(image_path)
 
     result = DeepFace.represent(
-        img_path=image_path, model_name=FaceDetectionModels.Facenet.value
+        img_path=image_path, model_name=FaceDetectionModels.Facenet512.value
     )
 
     match vectostore:
@@ -83,7 +83,7 @@ async def authenticate(file: UploadFile = File(...)) -> FaceAuthResponse:
     image_matrix = np.array(image)
 
     result = DeepFace.represent(
-        img_path=image_matrix, model_name=FaceDetectionModels.Facenet.value
+        img_path=image_matrix, model_name=FaceDetectionModels.Facenet512.value
     )
     embedding = np.array(result[0]["embedding"])
 

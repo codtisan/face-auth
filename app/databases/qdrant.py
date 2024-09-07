@@ -70,5 +70,4 @@ class Qdrant(VectorDatabaseBase):
             query_vector=query_vector,  # type: ignore
             limit=limit,
         )
-        print(response)
         return response
