@@ -6,10 +6,10 @@ COPY . .
 
 RUN pip install --upgrade pip
 
-RUN pip install --no-binary h5py h5py
-
-RUN pip install -r --no-cache-dir requirements.txt
+RUN pip install -r requirements.txt
 
 EXPOSE 3000
 
-CMD [ "python3", "main.py" ]
+RUN chmod +x scripts/entrypoint.sh
+
+ENTRYPOINT [ "scripts/entrypoint.sh" ] 
