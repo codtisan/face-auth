@@ -16,9 +16,12 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import asyncio
 from app.configs.face_models import FaceDetectionModels
+from app.databases.qdrant import Qdrant
 
 app = FastAPI()
-threshold = 0.9
+threshold = 0.96
+
+vectostore = os.getenv("VECTOR_DB")
 
 
 @app.get("/")
@@ -43,9 +46,24 @@ async def register(file: UploadFile = File(...)) -> FaceRegistrationResponse:
     os.mkdir(f"stores/{user_id}")
     image.save(image_path)
 
-    result = DeepFace.represent(img_path=image_path, model_name = FaceDetectionModels.Facenet.value)
+    result = DeepFace.represent(
+        img_path=image_path, model_name=FaceDetectionModels.Facenet.value
+    )
 
-    np.save(f"stores/{user_id}/embedding.npy", result[0]["embedding"])
+    match vectostore:
+        case "qdrant":
+            qdrant = Qdrant()
+            await qdrant.insert(
+                collection_name="face_data",
+                payload={
+                    "id": user_id,
+                    "image_path": image_path,
+                },
+                id=user_id,
+                vector=result[0]["embedding"],
+            )
+        case "local":
+            np.save(f"stores/{user_id}/embedding.npy", result[0]["embedding"])
 
     response = FaceRegistrationResponse(
         status="success",
@@ -64,19 +82,27 @@ async def authenticate(file: UploadFile = File(...)) -> FaceAuthResponse:
 
     image_matrix = np.array(image)
 
-    result = DeepFace.represent(img_path=image_matrix)
+    result = DeepFace.represent(
+        img_path=image_matrix, model_name=FaceDetectionModels.Facenet.value
+    )
     embedding = np.array(result[0]["embedding"])
 
-    user_dirs = os.listdir("stores")
+    match vectostore:
+        case "local":
+            user_dirs = os.listdir("stores")
 
-    async def get_embedding(dir: str):
-        return np.load(f"stores/{dir}/embedding.npy")
+            async def get_embedding(dir: str):
+                return np.load(f"stores/{dir}/embedding.npy")
 
-    task = [get_embedding(dir) for dir in user_dirs]
-    all_embeddings = await asyncio.gather(*task)
+            task = [get_embedding(dir) for dir in user_dirs]
+            all_embeddings = await asyncio.gather(*task)
 
-    similarity_results = cosine_similarity([embedding], all_embeddings)[0]
-    highest_similarity = similarity_results.max()
+            similarity_results = cosine_similarity([embedding], all_embeddings)[0]
+            highest_similarity = similarity_results.max()
+        case "qdrant":
+            qdrant = Qdrant()
+            response = await qdrant.search("face_data", limit=1, query_vector=embedding)
+            highest_similarity = response[0].score
 
     is_match = highest_similarity >= threshold
 
