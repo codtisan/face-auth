@@ -15,6 +15,7 @@ from deepface import DeepFace
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import asyncio
+from app.configs.face_models import FaceDetectionModels
 
 app = FastAPI()
 threshold = 0.9
@@ -42,7 +43,7 @@ async def register(file: UploadFile = File(...)) -> FaceRegistrationResponse:
     os.mkdir(f"stores/{user_id}")
     image.save(image_path)
 
-    result = DeepFace.represent(img_path=image_path)
+    result = DeepFace.represent(img_path=image_path, model_name = FaceDetectionModels.Facenet.value)
 
     np.save(f"stores/{user_id}/embedding.npy", result[0]["embedding"])
 
