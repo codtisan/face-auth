@@ -4,7 +4,16 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN pip install --upgrade pip
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3-dev \
+    libhdf5-dev \
+    pkg-config \
+    ffmpeg \ 
+    libsm6 \
+    libxext6
+
+RUN pip install --upgrade pip setuptools wheel
 
 RUN pip install -r requirements.txt
 

@@ -1,6 +1,6 @@
 services:
-  server:
-    container_name: face-auth-api
+  api:
+    container_name: face-auth-service
     build: .
     ports:
       - "${PORT}:3000"
