@@ -20,7 +20,7 @@ from app.databases.qdrant import Qdrant
 import logging
 
 app = FastAPI()
-threshold = 0.96
+threshold = 0.8
 vectostore = os.getenv("VECTOR_DB")
 logger = logging.getLogger("uvicorn.error")
 
