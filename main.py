@@ -8,7 +8,7 @@ load_dotenv()
 
 def bootstrap() -> None:
     port = int(os.getenv("PORT"))
-    uvicorn.run(app=app, port=port, host="0.0.0.0")
+    uvicorn.run(app=app, port=port, host="0.0.0.0", log_level='info')
 
 
 bootstrap()

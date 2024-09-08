@@ -1,6 +1,6 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Request
 from datetime import datetime
-from app.typings.healthcheck import HealthResponse
+from app.typings.api_response import HealthResponse
 from app.typings.api_response import (
     FaceAuthResponse,
     FaceRegistrationResponse,
@@ -17,11 +17,21 @@ from sklearn.metrics.pairwise import cosine_similarity
 import asyncio
 from app.configs.face_models import FaceDetectionModels
 from app.databases.qdrant import Qdrant
+import logging
 
 app = FastAPI()
 threshold = 0.96
-
 vectostore = os.getenv("VECTOR_DB")
+logger = logging.getLogger("uvicorn.error")
+
+
+@app.middleware("http")
+async def loggingMiddleware(request: Request, call_next):
+    logger.info(
+        f'Receiving {request.method} request on {request.url.path} {request.headers['user-agent']}'
+    )
+    response = await call_next(request)
+    return response
 
 
 @app.get("/")

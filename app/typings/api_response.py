@@ -25,3 +25,9 @@ class FaceAuthResponse(BaseModel):
     message: str
     timestamp: datetime
     results: FaceAuthResult
+
+class HealthResponse(BaseModel):
+    status: str
+    status_code: int
+    message: str
+    timestamp: datetime
