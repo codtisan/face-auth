@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Request
+from fastapi import FastAPI, UploadFile, File, Request, Form
 from datetime import datetime
 from app.typings.api_response import HealthResponse
 from app.typings.api_response import (
@@ -18,6 +18,7 @@ import asyncio
 from app.configs.face_models import FaceDetectionModels
 from app.databases.qdrant import Qdrant
 import logging
+from app.typings.user import UserInfo
 
 app = FastAPI()
 threshold = 0.8
@@ -46,7 +47,9 @@ async def get_health() -> HealthResponse:
 
 
 @app.post("/register")
-async def register(file: UploadFile = File(...)) -> FaceRegistrationResponse:
+async def register(
+    user_info: UserInfo = Form(...), file: UploadFile = File(...)
+) -> FaceRegistrationResponse:
     contents = file.file.read()
     image = Image.open(io.BytesIO(contents))
     user_id = str(uuid.uuid4())
@@ -62,13 +65,11 @@ async def register(file: UploadFile = File(...)) -> FaceRegistrationResponse:
 
     match vectostore:
         case "qdrant":
+            payload = {"id": user_id, "image_path": image_path, **user_info.model_dump()}
             qdrant = Qdrant()
             await qdrant.insert(
                 collection_name="face_data",
-                payload={
-                    "id": user_id,
-                    "image_path": image_path,
-                },
+                payload=payload,
                 id=user_id,
                 vector=result[0]["embedding"],
             )
